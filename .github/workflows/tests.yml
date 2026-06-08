@@ -21,6 +21,24 @@ permissions:
   contents: read
 
 jobs:
+  php84_compat:
+    name: PHP 8.4 Compatibility
+    timeout-minutes: 10
+    runs-on: ${{ vars.BEPLY_GHA_RUNNER || 'arc-runner-set' }}
+
+    steps:
+      - name: Checkout Plugin
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Run PHP 8.4 compatibility scan
+        run: php scripts/ci/php84-compat-scan.php "$PWD"
+
   unit:
     timeout-minutes: 20
     runs-on: ${{ vars.BEPLY_GHA_RUNNER || 'arc-runner-set' }}
@@ -42,13 +60,15 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: bcmath, gd, mbstring, intl, zip, curl, pgsql, pdo_pgsql
           coverage: none
 
       - name: Install Composer dependencies
         working-directory: facturascripts
-        run: composer install --no-interaction --prefer-dist
+        run: |
+          composer config platform.php 8.4.0
+          composer install --no-interaction --prefer-dist
 
       - name: Install plugin Composer dependencies
         working-directory: facturascripts
