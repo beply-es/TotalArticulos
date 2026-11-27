@@ -260,9 +260,11 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Validate tag matches plugin version
+        env:
+          PLUGIN_VERSION: ${{ steps.ini.outputs.version }}
         run: |
           set -e
-          EXPECTED_TAG="v${{ steps.ini.outputs.version }}"
+          EXPECTED_TAG="v${PLUGIN_VERSION}"
           if [ "${GITHUB_REF_NAME}" != "${EXPECTED_TAG}" ]; then
             echo "::error::Tag ${GITHUB_REF_NAME} does not match facturascripts.ini version ${EXPECTED_TAG}"
             exit 1

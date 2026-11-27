@@ -39,6 +39,9 @@ jobs:
       - name: Run PHP 8.4 compatibility scan
         run: php scripts/ci/php84-compat-scan.php "$PWD"
 
+
+      - name: Test workflow steps.outputs env contract
+        run: python3 -B -m unittest scripts/ci/test_workflow_no_steps_outputs_in_run.py
   unit:
     timeout-minutes: 20
     runs-on: ${{ vars.BEPLY_GHA_RUNNER || 'ubuntu-latest' }}
@@ -122,11 +125,13 @@ jobs:
       - name: Run PHPUnit unit suite
         if: steps.unit-targets.outputs.has_tests == 'true'
         working-directory: facturascripts
+        env:
+          PHPUNIT_TARGETS: ${{ steps.unit-targets.outputs.targets }}
         run: |
           php -d memory_limit=512M vendor/bin/phpunit -c phpunit-plugins.xml \
             --bootstrap Test/totalarticulos-ci-bootstrap.php \
             --testdox \
-            ${{ steps.unit-targets.outputs.targets }}
+            ${PHPUNIT_TARGETS}
 
       - name: Lint PHP sources
         working-directory: facturascripts
